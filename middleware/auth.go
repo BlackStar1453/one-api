@@ -98,7 +98,7 @@ func TokenAuth() func(c *gin.Context) {
 		key = parts[0]
 		token, err := model.ValidateUserToken(key)
 		if err != nil {
-            if tokenErr, ok := err.(*TokenError); ok {
+            if tokenErr, ok := err.(*model.TokenError); ok {
                 abortWithMessage(c, http.StatusUnauthorized, tokenErr.Message)
                 return
             }
