@@ -9,15 +9,21 @@ import (
 	"strings"
 )
 
+
 func abortWithMessage(c *gin.Context, statusCode int, message string) {
-	c.JSON(statusCode, gin.H{
-		"error": gin.H{
-			"message": helper.MessageWithRequestId(message, c.GetString(helper.RequestIdKey)),
-			"type":    "one_api_error",
-		},
-	})
-	c.Abort()
-	logger.Error(c.Request.Context(), message)
+    errorType := "one_api_error"
+    if tokenErr, ok := message.(*TokenError); ok {
+        errorType = tokenErr.Type
+        message = tokenErr.Message
+    }
+    c.JSON(statusCode, gin.H{
+        "error": gin.H{
+            "message": helper.MessageWithRequestId(message, c.GetString(helper.RequestIdKey)),
+            "type":    errorType,
+        },
+    })
+    c.Abort()
+    logger.Error(c.Request.Context(), message)
 }
 
 func getRequestModel(c *gin.Context) (string, error) {

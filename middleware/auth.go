@@ -98,9 +98,13 @@ func TokenAuth() func(c *gin.Context) {
 		key = parts[0]
 		token, err := model.ValidateUserToken(key)
 		if err != nil {
-			abortWithMessage(c, http.StatusUnauthorized, err.Error())
-			return
-		}
+            if tokenErr, ok := err.(*TokenError); ok {
+                abortWithMessage(c, http.StatusUnauthorized, tokenErr.Message)
+                return
+            }
+            abortWithMessage(c, http.StatusUnauthorized, err.Error())
+            return
+        }
 		if token.Subnet != nil && *token.Subnet != "" {
 			if !network.IsIpInSubnets(ctx, c.ClientIP(), *token.Subnet) {
 				abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("该令牌只能在指定网段使用：%s，当前 ip：%s", *token.Subnet, c.ClientIP()))
