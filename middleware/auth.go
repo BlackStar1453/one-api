@@ -99,10 +99,10 @@ func TokenAuth() func(c *gin.Context) {
 		token, err := model.ValidateUserToken(key)
 		if err != nil {
             if tokenErr, ok := err.(*model.TokenError); ok {
-                abortWithMessage(c, http.StatusUnauthorized, tokenErr.Message)
+                abortWithMessage(c, http.StatusUnauthorized, tokenErr) // 直接传递 tokenErr
                 return
             }
-            abortWithMessage(c, http.StatusUnauthorized, err.Error())
+            abortWithMessage(c, http.StatusUnauthorized, err) // 直接传递 err
             return
         }
 		if token.Subnet != nil && *token.Subnet != "" {

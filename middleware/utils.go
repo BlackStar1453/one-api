@@ -10,12 +10,20 @@ import (
 )
 
 
-func abortWithMessage(c *gin.Context, statusCode int, message string) {
+func abortWithMessage(c *gin.Context, statusCode int, err interface{}) {
+    var message string
     errorType := "one_api_error"
-    if tokenErr, ok := message.(*TokenError); ok {
-        errorType = tokenErr.Type
-        message = tokenErr.Message
+    
+    switch v := err.(type) {
+    case string:
+        message = v
+    case *model.TokenError:
+        errorType = v.Type
+        message = v.Message
+    default:
+        message = "Unknown error"
     }
+
     c.JSON(statusCode, gin.H{
         "error": gin.H{
             "message": helper.MessageWithRequestId(message, c.GetString(helper.RequestIdKey)),
